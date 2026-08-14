@@ -442,7 +442,20 @@ Kikes</textarea>
 
   const PALETTE = ['#d94a38', '#2e8f7f', '#c98a2c', '#7a5ea8', '#c2527e', '#4a7fb5', '#6d8b3c', '#b5651d'];
 
-  const FRASES = [
+  const FRASES_FAMILIA = {
+    'Luiguis': [
+      'Que emoción, con mi querida nuerita',
+      'Con mi hijo el médico',
+      '¡Siiii! Con mi hijo favorito'
+    ],
+    'Kikes': [
+      'Sí porque me quiero quedar con mi príncipe',
+      'Para seguir cuidando a mi yernito',
+      'No se vaya a lastimar mi Merry'
+    ]
+  };
+
+  /*const FRASES = [
     '¡{FAM}! ¡¿Qué es lo que está pasando aquí?!',
     '¡Ganan los {FAM}… pero me lavan los trastes!',
     '¡Aquí mando yo, y dije que ganan los {FAM}!',
@@ -450,7 +463,7 @@ Kikes</textarea>
     '¡Se acabó la discusión: ganaron los {FAM}!',
     '¡{FAM}, ni crean que no los estaba viendo!',
     '¡A ver, {FAM}: la chancla los señaló!'
-  ];
+  ];*/
 
   const FRASE_FINAL = '¡Se acabó, {FAM}! ¡Ni modo: SE LA QUEDAN!';
   const LIMITE = 3;
@@ -715,8 +728,15 @@ Kikes</textarea>
     } else {
       spinLbl.textContent = 'GIRAR';
       tvImg.src = scores[name] === 1 ? FOTO_R1 : FOTO_R2;
-      const frase = FRASES[Math.floor(Math.random() * FRASES.length)];
-      bubbleEl.innerHTML = escapeHtml(frase).replace('{FAM}', famHtml);
+      const pool = FRASES_FAMILIA[name];
+      if (pool) {
+        const frase = pool[Math.floor(Math.random() * pool.length)];
+        bubbleEl.innerHTML = famHtml + ': ' + escapeHtml(frase);
+      } 
+      /*else {
+        const frase = FRASES[Math.floor(Math.random() * FRASES.length)];
+        bubbleEl.innerHTML = escapeHtml(frase).replace('{FAM}', famHtml);
+      }*/
       okBtn.textContent = '¡OKEEEEEEEY!';
       statusEl.innerHTML = 'Regaño ' + scores[name] + ' de ' + LIMITE + ' para los <span class="who" style="color:' + col + '">' + escapeHtml(name) + '</span>.';
       fanfare();
