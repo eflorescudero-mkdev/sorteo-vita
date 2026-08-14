@@ -1,0 +1,589 @@
+<title>Luiguis vs Kikes</title>
+<style>
+  :root {
+    --noche-1: #1a1033;
+    --noche-2: #2b1550;
+    --luiguis: #ff5d5d;
+    --kikes: #2ec4b6;
+    --oro: #ffd166;
+    --crema: #fff3e0;
+    --crema-dim: rgba(255, 243, 224, 0.62);
+    --panel: rgba(255, 243, 224, 0.07);
+    --borde: rgba(255, 209, 102, 0.35);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    min-height: 100vh;
+    background: radial-gradient(120% 90% at 50% 0%, var(--noche-2) 0%, var(--noche-1) 62%, #120a24 100%);
+    color: var(--crema);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 28px 16px 56px;
+  }
+
+  header { text-align: center; margin-bottom: 6px; }
+
+  .eyebrow {
+    font-size: 12px;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--oro);
+    margin: 0 0 10px;
+  }
+
+  h1 {
+    margin: 0;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: clamp(26px, 6vw, 44px);
+    line-height: 1.1;
+    text-wrap: balance;
+  }
+
+  h1 .vs {
+    display: inline-block;
+    color: var(--oro);
+    font-style: italic;
+    font-size: 0.6em;
+    transform: translateY(-4px);
+    padding: 0 6px;
+  }
+
+  h1 .fam-a { color: var(--luiguis); text-shadow: 0 0 24px rgba(255, 93, 93, 0.45); }
+  h1 .fam-b { color: var(--kikes); text-shadow: 0 0 24px rgba(46, 196, 182, 0.45); }
+
+  .stage {
+    position: relative;
+    width: min(92vw, 520px);
+    margin-top: 26px;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  #wheel { display: block; width: 100%; height: auto; }
+
+  .pointer {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0; height: 0;
+    border-left: 20px solid transparent;
+    border-right: 20px solid transparent;
+    border-top: 38px solid var(--oro);
+    filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.55));
+    z-index: 6;
+    transform-origin: 50% 20%;
+  }
+
+  .pointer.wiggle { animation: wiggle 0.12s ease-out; }
+
+  @keyframes wiggle {
+    0%   { transform: translateX(-50%) rotate(0deg); }
+    40%  { transform: translateX(-50%) rotate(-9deg); }
+    100% { transform: translateX(-50%) rotate(0deg); }
+  }
+
+  #spin {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 25%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    border: 4px solid var(--oro);
+    background: radial-gradient(circle at 35% 30%, #4a3376, #241242 70%);
+    color: var(--oro);
+    font-family: inherit;
+    font-weight: 900;
+    font-size: clamp(14px, 3.2vw, 20px);
+    letter-spacing: 0.12em;
+    cursor: pointer;
+    z-index: 5;
+    box-shadow: 0 6px 22px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 243, 224, 0.25);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+  }
+
+  #spin:hover:not(:disabled) {
+    transform: translate(-50%, -50%) scale(1.06);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.7), 0 0 24px rgba(255, 209, 102, 0.35);
+  }
+
+  #spin:focus-visible { outline: 3px solid var(--crema); outline-offset: 3px; }
+  #spin:disabled { cursor: default; opacity: 0.75; }
+
+  #result {
+    min-height: 74px;
+    margin-top: 26px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+
+  #result .who {
+    font-size: clamp(26px, 7vw, 46px);
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    line-height: 1.05;
+    animation: pop 0.45s cubic-bezier(0.2, 1.6, 0.4, 1);
+  }
+
+  #result .label {
+    font-size: 13px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--crema-dim);
+  }
+
+  @keyframes pop {
+    0% { transform: scale(0.4); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #result .who, .pointer.wiggle { animation: none; }
+    #spin, #spin:hover:not(:disabled) { transition: none; }
+  }
+
+  #score {
+    display: flex;
+    gap: 12px;
+    margin-top: 18px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .chip {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 999px;
+    background: var(--panel);
+    border: 1px solid var(--borde);
+    font-weight: 700;
+  }
+
+  .chip .dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    align-self: center;
+  }
+
+  .chip .n {
+    font-variant-numeric: tabular-nums;
+    font-size: 18px;
+    color: var(--oro);
+  }
+
+  .tools {
+    margin-top: 26px;
+    width: min(92vw, 520px);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  details {
+    background: var(--panel);
+    border: 1px solid var(--borde);
+    border-radius: 14px;
+    padding: 12px 16px;
+  }
+
+  summary {
+    cursor: pointer;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-size: 12px;
+    color: var(--crema-dim);
+  }
+
+  summary:focus-visible { outline: 2px solid var(--oro); outline-offset: 2px; }
+
+  .editor {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  textarea {
+    width: 100%;
+    min-height: 74px;
+    resize: vertical;
+    border-radius: 10px;
+    border: 1px solid var(--borde);
+    background: rgba(18, 10, 36, 0.7);
+    color: var(--crema);
+    font-family: inherit;
+    font-size: 15px;
+    padding: 10px 12px;
+  }
+
+  textarea:focus-visible { outline: 2px solid var(--oro); outline-offset: 1px; }
+
+  .editor .row { display: flex; gap: 10px; flex-wrap: wrap; }
+
+  .btn {
+    border: 1px solid var(--borde);
+    background: var(--panel);
+    color: var(--crema);
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.04em;
+    padding: 9px 18px;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+
+  .btn:hover { background: rgba(255, 209, 102, 0.16); }
+  .btn:focus-visible { outline: 2px solid var(--oro); outline-offset: 2px; }
+
+  .hint { font-size: 13px; color: var(--crema-dim); margin: 0; }
+
+  #fx {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 50;
+  }
+</style>
+
+<header>
+  <p class="eyebrow">Gran sorteo familiar</p>
+  <h1><span class="fam-a">Luiguis</span> <span class="vs">vs</span> <span class="fam-b">Kikes</span></h1>
+</header>
+
+<div class="stage">
+  <div class="pointer" id="pointer"></div>
+  <canvas id="wheel"></canvas>
+  <button id="spin" type="button">GIRAR</button>
+</div>
+
+<div id="result" aria-live="polite"></div>
+<div id="score"></div>
+
+<div class="tools">
+  <details>
+    <summary>Editar familias</summary>
+    <div class="editor">
+      <p class="hint">Una familia por línea (mínimo 2). La ruleta reparte los espacios en partes iguales.</p>
+      <textarea id="names" spellcheck="false">Luiguis
+Kikes</textarea>
+      <div class="row">
+        <button class="btn" id="apply" type="button">Actualizar ruleta</button>
+        <button class="btn" id="reset" type="button">Reiniciar marcador</button>
+      </div>
+    </div>
+  </details>
+</div>
+
+<canvas id="fx"></canvas>
+
+<script>
+  const TAU = Math.PI * 2;
+  const SIZE = 560;
+  const C = SIZE / 2;
+  const R = 252;
+
+  const PALETTE = ['#ff5d5d', '#2ec4b6', '#f4a261', '#8e7dff', '#f15bb5', '#3fa7d6', '#b5e48c', '#ffd166'];
+
+  const canvas = document.getElementById('wheel');
+  const ctx = canvas.getContext('2d');
+  const fx = document.getElementById('fx');
+  const fctx = fx.getContext('2d');
+  const spinBtn = document.getElementById('spin');
+  const resultEl = document.getElementById('result');
+  const scoreEl = document.getElementById('score');
+  const pointerEl = document.getElementById('pointer');
+
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = SIZE * dpr;
+  canvas.height = SIZE * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  let names = ['Luiguis', 'Kikes'];
+  let segments = [];
+  let rot = 0;
+  let spinning = false;
+  let scores = {};
+  let actx = null;
+
+  function colorFor(name) {
+    return PALETTE[names.indexOf(name) % PALETTE.length];
+  }
+
+  function buildSegments() {
+    const reps = Math.max(1, Math.ceil(8 / names.length));
+    segments = [];
+    for (let r = 0; r < reps; r++) for (const n of names) segments.push(n);
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, SIZE, SIZE);
+    const seg = TAU / segments.length;
+
+    // Sectors
+    ctx.save();
+    ctx.translate(C, C);
+    ctx.rotate(rot);
+    segments.forEach((name, i) => {
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.arc(0, 0, R, i * seg, (i + 1) * seg);
+      ctx.closePath();
+      ctx.fillStyle = colorFor(name);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(18, 10, 36, 0.5)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.save();
+      ctx.rotate(i * seg + seg / 2);
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'middle';
+      let fs = Math.min(30, Math.max(13, (TAU * (R - 70) / segments.length) * 0.32));
+      ctx.font = '900 ' + fs + 'px system-ui, sans-serif';
+      while (ctx.measureText(name.toUpperCase()).width > R - 105 && fs > 11) {
+        fs -= 1;
+        ctx.font = '900 ' + fs + 'px system-ui, sans-serif';
+      }
+      ctx.fillStyle = 'rgba(18, 10, 36, 0.85)';
+      ctx.fillText(name.toUpperCase(), R - 22, 2);
+      ctx.fillStyle = '#fff3e0';
+      ctx.fillText(name.toUpperCase(), R - 24, 0);
+      ctx.restore();
+    });
+    ctx.restore();
+
+    // Rim
+    ctx.save();
+    ctx.translate(C, C);
+    ctx.beginPath();
+    ctx.arc(0, 0, R + 8, 0, TAU);
+    ctx.strokeStyle = '#ffd166';
+    ctx.lineWidth = 10;
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(0, 0, R + 14, 0, TAU);
+    ctx.strokeStyle = 'rgba(255, 209, 102, 0.25)';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    // Fair lights on the rim
+    const lights = 24;
+    for (let i = 0; i < lights; i++) {
+      const a = (i / lights) * TAU;
+      const on = spinning ? (i + Math.floor(performance.now() / 90)) % 2 === 0 : i % 2 === 0;
+      ctx.beginPath();
+      ctx.arc(Math.cos(a) * (R + 8), Math.sin(a) * (R + 8), 4.5, 0, TAU);
+      ctx.fillStyle = on ? '#fff3e0' : 'rgba(18, 10, 36, 0.55)';
+      ctx.fill();
+    }
+
+    // Hub base under the button
+    ctx.beginPath();
+    ctx.arc(0, 0, 78, 0, TAU);
+    ctx.fillStyle = 'rgba(18, 10, 36, 0.4)';
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function winnerIndex() {
+    const seg = TAU / segments.length;
+    const a = (((-Math.PI / 2 - rot) % TAU) + TAU) % TAU;
+    return Math.floor(a / seg);
+  }
+
+  // --- Sound ---
+  function ensureAudio() {
+    if (!actx) {
+      try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { actx = null; }
+    }
+    if (actx && actx.state === 'suspended') actx.resume();
+  }
+
+  function tick() {
+    if (!actx) return;
+    const t = actx.currentTime;
+    const o = actx.createOscillator();
+    const g = actx.createGain();
+    o.type = 'square';
+    o.frequency.value = 850;
+    g.gain.setValueAtTime(0.05, t);
+    g.gain.exponentialRampToValueAtTime(0.0005, t + 0.05);
+    o.connect(g).connect(actx.destination);
+    o.start(t);
+    o.stop(t + 0.06);
+  }
+
+  function fanfare() {
+    if (!actx) return;
+    [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => {
+      const t = actx.currentTime + i * 0.12;
+      const o = actx.createOscillator();
+      const g = actx.createGain();
+      o.type = 'triangle';
+      o.frequency.value = f;
+      g.gain.setValueAtTime(0.12, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+      o.connect(g).connect(actx.destination);
+      o.start(t);
+      o.stop(t + 0.32);
+    });
+  }
+
+  // --- Spin ---
+  function spin() {
+    if (spinning) return;
+    ensureAudio();
+    spinning = true;
+    spinBtn.disabled = true;
+    spinBtn.textContent = '...';
+    resultEl.innerHTML = '';
+
+    const duration = 4600 + Math.random() * 1400;
+    const turns = 6 + Math.random() * 4;
+    const from = rot;
+    const to = rot + turns * TAU + Math.random() * TAU;
+    const t0 = performance.now();
+    let lastIdx = winnerIndex();
+
+    function frame(now) {
+      const t = Math.min(1, (now - t0) / duration);
+      const ease = 1 - Math.pow(1 - t, 4);
+      rot = from + (to - from) * ease;
+      draw();
+
+      const idx = winnerIndex();
+      if (idx !== lastIdx) {
+        lastIdx = idx;
+        tick();
+        pointerEl.classList.remove('wiggle');
+        void pointerEl.offsetWidth;
+        pointerEl.classList.add('wiggle');
+      }
+
+      if (t < 1) {
+        requestAnimationFrame(frame);
+      } else {
+        finish();
+      }
+    }
+    requestAnimationFrame(frame);
+  }
+
+  function finish() {
+    spinning = false;
+    spinBtn.disabled = false;
+    spinBtn.textContent = 'GIRAR';
+    const name = segments[winnerIndex()];
+    scores[name] = (scores[name] || 0) + 1;
+    const col = colorFor(name);
+    resultEl.innerHTML =
+      '<span class="label">La ruleta eligió a</span>' +
+      '<span class="who" style="color:' + col + '; text-shadow: 0 0 30px ' + col + '66">🎉 ' + escapeHtml(name) + ' 🎉</span>';
+    renderScore();
+    fanfare();
+    confetti(col);
+    draw();
+  }
+
+  // --- Score ---
+  function renderScore() {
+    scoreEl.innerHTML = names.map(n =>
+      '<span class="chip"><span class="dot" style="background:' + colorFor(n) + '"></span>' +
+      escapeHtml(n) + ' <span class="n">' + (scores[n] || 0) + '</span></span>'
+    ).join('');
+  }
+
+  function escapeHtml(s) {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  // --- Confetti ---
+  let parts = [];
+  let fxRunning = false;
+
+  function confetti(mainColor) {
+    fx.width = innerWidth * dpr;
+    fx.height = innerHeight * dpr;
+    fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const cols = [mainColor, '#ffd166', '#fff3e0', mainColor];
+    for (let i = 0; i < 160; i++) {
+      parts.push({
+        x: Math.random() * innerWidth,
+        y: -20 - Math.random() * innerHeight * 0.4,
+        vx: (Math.random() - 0.5) * 2.4,
+        vy: 2 + Math.random() * 3.5,
+        s: 5 + Math.random() * 7,
+        c: cols[i % cols.length],
+        a: Math.random() * TAU,
+        va: (Math.random() - 0.5) * 0.25
+      });
+    }
+    if (!fxRunning) { fxRunning = true; requestAnimationFrame(fxFrame); }
+  }
+
+  function fxFrame() {
+    fctx.clearRect(0, 0, innerWidth, innerHeight);
+    parts.forEach(p => {
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.025;
+      p.a += p.va;
+      fctx.save();
+      fctx.translate(p.x, p.y);
+      fctx.rotate(p.a);
+      fctx.fillStyle = p.c;
+      fctx.fillRect(-p.s / 2, -p.s / 2, p.s, p.s * 0.6);
+      fctx.restore();
+    });
+    parts = parts.filter(p => p.y < innerHeight + 30);
+    if (parts.length) {
+      requestAnimationFrame(fxFrame);
+    } else {
+      fxRunning = false;
+      fctx.clearRect(0, 0, innerWidth, innerHeight);
+    }
+  }
+
+  // --- Editor ---
+  document.getElementById('apply').addEventListener('click', () => {
+    const list = document.getElementById('names').value
+      .split('\n').map(s => s.trim()).filter(Boolean);
+    if (list.length < 2) return;
+    names = list;
+    scores = Object.fromEntries(names.map(n => [n, scores[n] || 0]));
+    buildSegments();
+    renderScore();
+    draw();
+  });
+
+  document.getElementById('reset').addEventListener('click', () => {
+    scores = {};
+    renderScore();
+  });
+
+  spinBtn.addEventListener('click', spin);
+
+  // Blinking lights while spinning
+  setInterval(() => { if (spinning) draw(); }, 90);
+
+  buildSegments();
+  renderScore();
+  draw();
+</script>
