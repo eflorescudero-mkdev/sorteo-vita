@@ -1,4 +1,4 @@
-<title>La Ruleta de la Señora</title>
+<title>La Ruleta de la Vita 😒</title>
 <style>
   :root {
     --mostaza: #eebc3f;
@@ -140,8 +140,9 @@
     color: var(--crema);
     font-family: inherit;
     font-weight: 900;
-    font-size: clamp(12px, 2.6vw, 17px);
-    letter-spacing: 0.14em;
+    font-size: clamp(11px, 2.2vw, 14px);
+    letter-spacing: 0.07em;
+    white-space: nowrap;
     padding: 4px 0 6px;
   }
 
@@ -178,10 +179,25 @@
 
   .chip .dot { width: 10px; height: 10px; border-radius: 50%; align-self: center; }
 
-  .chip .n {
-    font-variant-numeric: tabular-nums;
-    font-size: 18px;
+  .chip .strikes { letter-spacing: 3px; font-size: 17px; }
+  .chip .strikes .off { opacity: 0.2; filter: grayscale(1); }
+
+  .chip .tag {
+    background: var(--cafe);
+    color: var(--crema);
+    border-radius: 6px;
+    font-size: 10px;
     font-weight: 900;
+    letter-spacing: 0.08em;
+    padding: 3px 7px;
+    align-self: center;
+    text-transform: uppercase;
+  }
+
+  .chip.loser {
+    background: #fff;
+    border-width: 3px;
+    transform: rotate(-1.5deg);
   }
 
   .tools {
@@ -359,8 +375,8 @@
 
 <header>
   <p class="eyebrow">Gran sorteo familiar</p>
-  <h1>La Ruleta de la Señora</h1>
-  <p class="sub"><span class="fam-a">Luiguis</span> contra <span class="fam-b">Kikes</span> · Ella decide y no se discute.</p>
+  <h1>La Ruleta de la Vita 😒</h1>
+  <p class="sub"><span class="fam-a">Luiguis</span> contra <span class="fam-b">Kikes</span> · Al tercer chanclazo, ni modo: se la quedan.</p>
 </header>
 
 <div class="stage">
@@ -385,7 +401,7 @@
   <details>
     <summary>Editar familias</summary>
     <div class="editor">
-      <p class="hint">Una familia por línea (mínimo 2). La ruleta reparte los espacios en partes iguales.</p>
+      <p class="hint">Una familia por línea (mínimo 2). Al llegar a 3 chanclazos, esa familia se la queda. Cambiar la lista reinicia el marcador.</p>
       <textarea id="names" spellcheck="false">Luiguis
 Kikes</textarea>
       <div class="row">
@@ -419,8 +435,11 @@ Kikes</textarea>
     '¡{FAM}! ¡No me hagan ir por la chancla!',
     '¡Se acabó la discusión: ganaron los {FAM}!',
     '¡{FAM}, ni crean que no los estaba viendo!',
-    '¡A ver, {FAM}: ganaron, pero recogen la mesa!'
+    '¡A ver, {FAM}: la chancla los señaló!'
   ];
+
+  const FRASE_FINAL = '¡Se acabó, {FAM}! ¡Ni modo: SE LA QUEDAN!';
+  const LIMITE = 3;
 
   const canvas = document.getElementById('wheel');
   const ctx = canvas.getContext('2d');
@@ -445,6 +464,8 @@ Kikes</textarea>
   let rot = 0;
   let spinning = false;
   let scores = {};
+  let gameOver = false;
+  let perdedor = null;
   let actx = null;
 
   function colorFor(name) {
@@ -452,7 +473,7 @@ Kikes</textarea>
   }
 
   function buildSegments() {
-    const reps = Math.max(1, Math.ceil(8 / names.length));
+    const reps = Math.max(1, Math.ceil(16 / names.length));
     segments = [];
     for (let r = 0; r < reps; r++) for (const n of names) segments.push(n);
   }
@@ -537,13 +558,13 @@ Kikes</textarea>
     if (actx && actx.state === 'suspended') actx.resume();
   }
 
-  function tick() {
+  function tick(progreso) {
     if (!actx) return;
     const t = actx.currentTime;
     const o = actx.createOscillator();
     const g = actx.createGain();
     o.type = 'square';
-    o.frequency.value = 850;
+    o.frequency.value = 950 - 480 * (progreso || 0);
     g.gain.setValueAtTime(0.05, t);
     g.gain.exponentialRampToValueAtTime(0.0005, t + 0.05);
     o.connect(g).connect(actx.destination);
@@ -567,9 +588,37 @@ Kikes</textarea>
     });
   }
 
+  function trombon() {
+    if (!actx) return;
+    [233.08, 220, 207.65, 196].forEach((f, i) => {
+      const t = actx.currentTime + i * 0.38;
+      const dur = i === 3 ? 1.1 : 0.34;
+      const o = actx.createOscillator();
+      const g = actx.createGain();
+      o.type = 'sawtooth';
+      o.frequency.setValueAtTime(f, t);
+      if (i === 3) o.frequency.setValueAtTime(f * 0.985, t + 0.55);
+      g.gain.setValueAtTime(0.001, t);
+      g.gain.linearRampToValueAtTime(0.1, t + 0.05);
+      g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+      o.connect(g).connect(actx.destination);
+      o.start(t);
+      o.stop(t + dur + 0.05);
+    });
+  }
+
   // --- Giro ---
+  function resetGame() {
+    scores = {};
+    gameOver = false;
+    perdedor = null;
+    spinLbl.textContent = 'GIRAR';
+    renderScore();
+  }
+
   function spin() {
     if (spinning) return;
+    if (gameOver) resetGame();
     ensureAudio();
     spinning = true;
     spinBtn.disabled = true;
@@ -577,23 +626,32 @@ Kikes</textarea>
     spinLbl.textContent = '...';
     statusEl.textContent = 'La señora está decidiendo… no la interrumpan.';
 
-    const duration = 4600 + Math.random() * 1400;
-    const turns = 6 + Math.random() * 4;
+    const duration = 9000 + Math.random() * 2500;
+    const turns = 10 + Math.random() * 5;
     const from = rot;
     const to = rot + turns * TAU + Math.random() * TAU;
     const t0 = performance.now();
     let lastIdx = winnerIndex();
+    let drama = 0;
 
     function frame(now) {
       const t = Math.min(1, (now - t0) / duration);
-      const ease = 1 - Math.pow(1 - t, 4);
+      const ease = 1 - Math.pow(1 - t, 6);
       rot = from + (to - from) * ease;
       draw();
+
+      if (t > 0.9 && drama < 2) {
+        drama = 2;
+        statusEl.textContent = '¡No respiren, ya casi cae!';
+      } else if (t > 0.72 && drama < 1) {
+        drama = 1;
+        statusEl.textContent = 'Ya mero… ya mero…';
+      }
 
       const idx = winnerIndex();
       if (idx !== lastIdx) {
         lastIdx = idx;
-        tick();
+        tick(t);
         pointerEl.classList.remove('wiggle');
         void pointerEl.getBoundingClientRect();
         pointerEl.classList.add('wiggle');
@@ -612,18 +670,29 @@ Kikes</textarea>
     spinning = false;
     spinBtn.disabled = false;
     spinBtn.classList.remove('girando');
-    spinLbl.textContent = 'GIRAR';
     const name = segments[winnerIndex()];
     scores[name] = (scores[name] || 0) + 1;
     const col = colorFor(name);
-
-    const frase = FRASES[Math.floor(Math.random() * FRASES.length)];
     const famHtml = '<span style="color:' + col + '">' + escapeHtml(name.toUpperCase()) + '</span>';
-    bubbleEl.innerHTML = escapeHtml(frase).replace('{FAM}', famHtml);
 
-    statusEl.innerHTML = 'La señora eligió a los <span class="who" style="color:' + col + '">' + escapeHtml(name) + '</span>.';
+    if (scores[name] >= LIMITE) {
+      gameOver = true;
+      perdedor = name;
+      spinLbl.textContent = 'OTRA VEZ';
+      bubbleEl.innerHTML = escapeHtml(FRASE_FINAL).replace('{FAM}', famHtml);
+      okBtn.textContent = 'NI MODO…';
+      statusEl.innerHTML = 'Los <span class="who" style="color:' + col + '">' + escapeHtml(name) + '</span> se la quedan. Ni modo.';
+      trombon();
+    } else {
+      spinLbl.textContent = 'GIRAR';
+      const frase = FRASES[Math.floor(Math.random() * FRASES.length)];
+      bubbleEl.innerHTML = escapeHtml(frase).replace('{FAM}', famHtml);
+      okBtn.textContent = '¡SÍ, SEÑORA!';
+      statusEl.innerHTML = 'Regaño ' + scores[name] + ' de ' + LIMITE + ' para los <span class="who" style="color:' + col + '">' + escapeHtml(name) + '</span>.';
+      fanfare();
+    }
+
     renderScore();
-    fanfare();
     confetti(col);
     draw();
 
@@ -644,10 +713,19 @@ Kikes</textarea>
 
   // --- Marcador ---
   function renderScore() {
-    scoreEl.innerHTML = names.map(n =>
-      '<span class="chip"><span class="dot" style="background:' + colorFor(n) + '"></span>' +
-      escapeHtml(n) + ' <span class="n" style="color:' + colorFor(n) + '">' + (scores[n] || 0) + '</span></span>'
-    ).join('');
+    scoreEl.innerHTML = names.map(n => {
+      const hits = scores[n] || 0;
+      let slots = '';
+      for (let i = 0; i < LIMITE; i++) {
+        slots += '<span class="' + (i < hits ? 'on' : 'off') + '">🩴</span>';
+      }
+      const esPerdedor = gameOver && n === perdedor;
+      return '<span class="chip' + (esPerdedor ? ' loser' : '') + '">' +
+        '<span class="dot" style="background:' + colorFor(n) + '"></span>' +
+        escapeHtml(n) + ' <span class="strikes">' + slots + '</span>' +
+        (esPerdedor ? '<span class="tag">se la quedan</span>' : '') +
+        '</span>';
+    }).join('');
   }
 
   function escapeHtml(s) {
@@ -707,16 +785,12 @@ Kikes</textarea>
       .split('\n').map(s => s.trim()).filter(Boolean);
     if (list.length < 2) return;
     names = list;
-    scores = Object.fromEntries(names.map(n => [n, scores[n] || 0]));
     buildSegments();
-    renderScore();
+    resetGame();
     draw();
   });
 
-  document.getElementById('reset').addEventListener('click', () => {
-    scores = {};
-    renderScore();
-  });
+  document.getElementById('reset').addEventListener('click', resetGame);
 
   spinBtn.addEventListener('click', spin);
 
